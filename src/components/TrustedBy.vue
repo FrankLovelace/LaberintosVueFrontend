@@ -1,0 +1,64 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { RouterLink } from 'vue-router' // Importamos el componente de enlace de Vue
+
+// 1. Definimos una "interfaz" para decirle a TypeScript cómo son nuestros objetos de cliente.
+interface Cliente {
+  id: number
+  nombre: string
+  logoUrl: string
+}
+// 2. Creamos una variable "reactiva" para guardar la lista de clientes.
+//    Vue actualizará el HTML automáticamente cuando esta variable cambie.
+const clientes = ref<Cliente[]>([])
+const isLoading = ref<boolean>(true) // Para mostrar el mensaje "Cargando..."
+
+// 3. Usamos 'onMounted' para ejecutar el código cuando el componente se carga por primera vez.
+//    Esto es el equivalente a tu 'DOMContentLoaded'.
+onMounted(async () => {
+  try {
+    const response = await fetch('/api/portfolio/clientes')
+    if (!response.ok) {
+      throw new Error('Error al cargar los clientes')
+    }
+    const data = await response.json()
+    clientes.value = data // Guardamos los datos en nuestra variable reactiva
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isLoading.value = false // Ocultamos el mensaje de "Cargando..."
+  }
+})
+</script>
+
+<template>
+  <div class="bg-gray-50 py-16">
+    <div class="container mx-auto px-6 text-center">
+      <h2 class="text-3xl font-bold text-gray-800">Nuestros Clientes Confían en Nosotros</h2>
+      <p class="mt-4 text-gray-600 max-w-2xl mx-auto">
+        Tenemos el honor de ser socios estratégicos de marcas líderes que avalan la calidad y
+        seguridad de nuestro trabajo.
+      </p>
+
+      <div v-if="isLoading" class="mt-12">
+        <p>Cargando logos...</p>
+      </div>
+
+      <div v-else class="mt-12 flex flex-wrap justify-center items-center gap-x-12 gap-y-8">
+        <RouterLink
+          v-for="cliente in clientes"
+          :key="cliente.id"
+          :to="'/clientes/' + cliente.id"
+          class="flex justify-center items-center h-20 w-40 transition duration-300 ease-in-out grayscale opacity-70 hover:grayscale-0 hover:opacity-100"
+          :title="cliente.nombre"
+        >
+          <img
+            :src="cliente.logoUrl"
+            :alt="'Logo de ' + cliente.nombre"
+            class="max-h-full max-w-full object-contain"
+          />
+        </RouterLink>
+      </div>
+    </div>
+  </div>
+</template>
