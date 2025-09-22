@@ -1,37 +1,39 @@
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
-// Estado reactivo (el corazón de nuestro store)
 const isVisible = ref<boolean>(false)
 const imageUrl = ref<string>('')
-const timer = ref<number | null>(null)
 
-const PREVIEW_DELAY = 1000 // 1 segundo de retraso
+// --- LÓGICA MEJORADA PARA EL BOTÓN "ATRÁS" ---
+const handlePopState = () => {
+  // Si el popup está visible cuando el usuario navega hacia atrás, lo cerramos.
+  if (isVisible.value) {
+    isVisible.value = false
+    imageUrl.value = ''
+  }
+}
 
-// Funciones para modificar el estado (las acciones)
+// Observamos la variable 'isVisible'.
+watch(isVisible, (newValue) => {
+  if (newValue) {
+    // Si el popup se hace visible, empezamos a escuchar el evento "popstate".
+    window.addEventListener('popstate', handlePopState)
+  } else {
+    // Si el popup se oculta, dejamos de escuchar para no gastar recursos.
+    window.removeEventListener('popstate', handlePopState)
+  }
+})
+
 export function useImagePreview() {
   const showPreview = (url: string) => {
-    // Si ya hay un timer, lo limpiamos para evitar múltiples popups
-    if (timer.value) {
-      clearTimeout(timer.value)
-    }
-    // Creamos un nuevo timer
-    timer.value = window.setTimeout(() => {
-      imageUrl.value = url
-      isVisible.value = true
-    }, PREVIEW_DELAY)
+    imageUrl.value = url
+    isVisible.value = true
   }
 
   const hidePreview = () => {
-    // Si el cursor se quita antes del delay, cancelamos el timer
-    if (timer.value) {
-      clearTimeout(timer.value)
-    }
-    // Ocultamos la vista previa
     isVisible.value = false
     imageUrl.value = ''
   }
 
-  // Exponemos el estado y las funciones para que otros componentes los usen
   return {
     isVisible,
     imageUrl,
