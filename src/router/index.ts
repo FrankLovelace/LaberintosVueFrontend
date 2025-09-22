@@ -9,12 +9,12 @@ const router = createRouter({
       name: 'home',
       component: HomeView, // Le decimos que cargue nuestro componente HomeView
     },
-    // Puedes añadir más rutas aquí en el futuro
-    // {
-    //   path: '/portafolio',
-    //   name: 'portafolio',
-    //   component: () => import('../views/PortfolioView.vue')
-    // }
+    {
+      path: '/servicios',
+      name: 'servicios',
+      // Esto es "lazy loading"
+      component: () => import('../views/ServicesView.vue'),
+    },
   ],
 })
 

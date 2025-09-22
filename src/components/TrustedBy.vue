@@ -49,7 +49,7 @@ onMounted(async () => {
           v-for="cliente in clientes"
           :key="cliente.id"
           :to="'/clientes/' + cliente.id"
-          class="flex justify-center items-center h-20 w-40 transition duration-300 ease-in-out grayscale opacity-70 hover:grayscale-0 hover:opacity-100"
+          class="flex justify-center items-center h-30 w-60 transition duration-300 ease-in-out"
           :title="cliente.nombre"
         >
           <img

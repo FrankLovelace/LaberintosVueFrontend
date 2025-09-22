@@ -14,7 +14,7 @@ const isMobileMenuOpen = ref<boolean>(false)
     <div class="container mx-auto px-6">
       <div class="flex justify-between items-center py-3">
         <RouterLink to="/">
-          <img src="/images/logo.png" alt="Logo Laberintos Praderas" class="h-14 w-auto" />
+          <img src="/images/logo.png" alt="Logo Laberintos Praderas" class="h-16 w-auto" />
         </RouterLink>
 
         <div>
