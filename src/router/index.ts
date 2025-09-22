@@ -15,6 +15,11 @@ const router = createRouter({
       // Esto es "lazy loading"
       component: () => import('../views/ServicesView.vue'),
     },
+    {
+      path: '/sobre-nosotros',
+      name: 'sobre-nosotros',
+      component: () => import('../views/AboutView.vue'),
+    },
   ],
 })
 
