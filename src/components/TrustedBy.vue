@@ -17,7 +17,7 @@ const isLoading = ref<boolean>(true) // Para mostrar el mensaje "Cargando..."
 //    Esto es el equivalente a tu 'DOMContentLoaded'.
 onMounted(async () => {
   try {
-    const response = await fetch('/api/portfolio/clientes')
+    const response = await fetch('https://app.laberintospraderas.com/api/portfolio/clientes')
     if (!response.ok) {
       throw new Error('Error al cargar los clientes')
     }
