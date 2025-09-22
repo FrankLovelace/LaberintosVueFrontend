@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue' // Importamos nuestra nueva vista
+import { isVisible, hidePreview } from '../stores/ImagePreviewStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +27,14 @@ const router = createRouter({
       component: () => import('../views/ContactView.vue'),
     },
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  if (isVisible.value) {
+    // Si está visible, lo cerramos.
+    hidePreview()
+  }
+  next()
 })
 
 export default router
