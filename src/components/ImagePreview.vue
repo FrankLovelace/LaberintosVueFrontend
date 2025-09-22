@@ -7,7 +7,7 @@ const { isVisible, imageUrl, hidePreview } = useImagePreview()
   <div
     v-if="isVisible"
     @click.self="hidePreview"
-    class="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center p-4 cursor-pointer"
+    class="fixed inset-0 bg-black bg-opacity-75 z-50 flex justify-center items-center p-4 cursor-pointer"
   >
     <img
       @click.stop

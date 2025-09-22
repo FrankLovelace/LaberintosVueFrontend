@@ -1,19 +1,16 @@
 <script setup lang="ts">
-import { useImagePreview } from '@/stores/ImagePreviewStore' // <-- 1. IMPORTAR
+import { useImagePreview } from '@/stores/ImagePreviewStore'
 
 const props = defineProps({
-  // <-- 2. GUARDAMOS LAS PROPS EN UNA VARIABLE
   title: String,
   description: String,
   imageUrl: String,
   features: Array as () => string[],
 })
 
-// Obtenemos las funciones de nuestro store
-const { showPreview, hidePreview } = useImagePreview()
+const { showPreview } = useImagePreview()
 
-// Función para llamar a showPreview con la URL de esta tarjeta
-const handleMouseEnter = () => {
+const handleCardClick = () => {
   if (props.imageUrl) {
     showPreview(props.imageUrl)
   }
@@ -22,9 +19,8 @@ const handleMouseEnter = () => {
 
 <template>
   <div
-    @mouseenter="handleMouseEnter"
-    @mouseleave="hidePreview"
-    class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:scale-[1.02]"
+    @click="handleCardClick"
+    class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
   >
     <img :src="imageUrl" :alt="title" class="w-full h-56 object-cover" />
     <div class="p-6">
