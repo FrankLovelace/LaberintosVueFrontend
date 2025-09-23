@@ -1,10 +1,15 @@
-<!-- eslint-disable vue/multi-word-component-names -->
+<script lang="ts">
+export default {
+  name: 'MainNavbar',
+}
+</script>
+
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
-// 👇 1. Importa los componentes de Headless UI que vamos a usar
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 
+// Esta es la variable que controla el menú móvil.
 const isMobileMenuOpen = ref<boolean>(false)
 </script>
 
@@ -76,6 +81,7 @@ const isMobileMenuOpen = ref<boolean>(false)
                   </MenuItems>
                 </transition>
               </Menu>
+
               <RouterLink to="/sobre-nosotros" class="text-gray-700 hover:text-primary font-medium"
                 >Sobre nosotros</RouterLink
               >
@@ -110,7 +116,39 @@ const isMobileMenuOpen = ref<boolean>(false)
         </div>
       </div>
 
-      <div v-if="isMobileMenuOpen" class="md:hidden pb-3"></div>
+      <div v-if="isMobileMenuOpen" class="md:hidden pb-3">
+        <RouterLink
+          to="/servicios"
+          class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 rounded"
+          >Servicios</RouterLink
+        >
+        <RouterLink
+          to="/proyectos"
+          class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 rounded"
+          >Proyectos</RouterLink
+        >
+        <RouterLink
+          to="/clientes"
+          class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 rounded"
+          >Clientes</RouterLink
+        >
+        <RouterLink
+          to="/sobre-nosotros"
+          class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 rounded"
+          >Sobre nosotros</RouterLink
+        >
+        <RouterLink
+          to="/contacto"
+          class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 rounded"
+          >Contacto</RouterLink
+        >
+        <a
+          href="https://app.laberintospraderas.com"
+          target="_blank"
+          class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 rounded"
+          >Admin Panel</a
+        >
+      </div>
     </div>
   </nav>
 </template>
