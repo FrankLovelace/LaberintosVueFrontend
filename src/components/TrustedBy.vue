@@ -1,20 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
-// 1. Definimos una "interfaz" para decirle a TypeScript cómo son nuestros objetos de cliente.
 interface Cliente {
   id: number
   nombre: string
   logoUrl: string
-  LinkExterno?: string
+  LinkExterno?: string // Verifica que el nombre sea exactamente este
 }
-// 2. Creamos una variable "reactiva" para guardar la lista de clientes.
-//    Vue actualizará el HTML automáticamente cuando esta variable cambie.
-const clientes = ref<Cliente[]>([])
-const isLoading = ref<boolean>(true) // Para mostrar el mensaje "Cargando..."
 
-// 3. Usamos 'onMounted' para ejecutar el código cuando el componente se carga por primera vez.
-//    Esto es el equivalente a tu 'DOMContentLoaded'.
+const clientes = ref<Cliente[]>([])
+const isLoading = ref<boolean>(true)
+
 onMounted(async () => {
   try {
     const response = await fetch('https://app.laberintospraderas.com/api/portfolio/clientes')
@@ -22,11 +18,11 @@ onMounted(async () => {
       throw new Error('Error al cargar los clientes')
     }
     const data = await response.json()
-    clientes.value = data // Guardamos los datos en nuestra variable reactiva
+    clientes.value = data
   } catch (error) {
     console.error(error)
   } finally {
-    isLoading.value = false // Ocultamos el mensaje de "Cargando..."
+    isLoading.value = false
   }
 })
 </script>
@@ -51,7 +47,7 @@ onMounted(async () => {
             :href="cliente.LinkExterno"
             target="_blank"
             rel="noopener noreferrer"
-            class="flex justify-center items-center h-16 w-32 transition duration-300 ease-in-out hover:opacity-75"
+            class="flex justify-center items-center h-20 w-40 transition duration-300 ease-in-out hover:opacity-75"
             :title="cliente.nombre"
           >
             <img
@@ -61,7 +57,7 @@ onMounted(async () => {
             />
           </a>
 
-          <div v-else class="flex justify-center items-center h-16 w-32" :title="cliente.nombre">
+          <div v-else class="flex justify-center items-center h-20 w-40" :title="cliente.nombre">
             <img
               :src="cliente.logoUrl"
               :alt="'Logo de ' + cliente.nombre"
