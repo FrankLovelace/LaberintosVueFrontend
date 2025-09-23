@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { RouterLink } from 'vue-router' // Importamos el componente de enlace de Vue
 
 // 1. Definimos una "interfaz" para decirle a TypeScript cómo son nuestros objetos de cliente.
 interface Cliente {
   id: number
   nombre: string
   logoUrl: string
+  LinkExterno?: string
 }
 // 2. Creamos una variable "reactiva" para guardar la lista de clientes.
 //    Vue actualizará el HTML automáticamente cuando esta variable cambie.
@@ -45,19 +45,30 @@ onMounted(async () => {
       </div>
 
       <div v-else class="mt-12 flex flex-wrap justify-center items-center gap-x-12 gap-y-8">
-        <RouterLink
-          v-for="cliente in clientes"
-          :key="cliente.id"
-          :to="'/clientes/' + cliente.id"
-          class="flex justify-center items-center h-30 w-60 transition duration-300 ease-in-out"
-          :title="cliente.nombre"
-        >
-          <img
-            :src="cliente.logoUrl"
-            :alt="'Logo de ' + cliente.nombre"
-            class="max-h-full max-w-full object-contain"
-          />
-        </RouterLink>
+        <div v-for="cliente in clientes" :key="cliente.id">
+          <a
+            v-if="cliente.LinkExterno"
+            :href="cliente.LinkExterno"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex justify-center items-center h-16 w-32 transition duration-300 ease-in-out hover:opacity-75"
+            :title="cliente.nombre"
+          >
+            <img
+              :src="cliente.logoUrl"
+              :alt="'Logo de ' + cliente.nombre"
+              class="max-h-full max-w-full object-contain"
+            />
+          </a>
+
+          <div v-else class="flex justify-center items-center h-16 w-32" :title="cliente.nombre">
+            <img
+              :src="cliente.logoUrl"
+              :alt="'Logo de ' + cliente.nombre"
+              class="max-h-full max-w-full object-contain"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </div>
