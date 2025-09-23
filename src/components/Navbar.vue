@@ -1,12 +1,16 @@
+<script lang="ts">
+export default {
+  name: 'TheNavbar',
+}
+</script>
+
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
-defineOptions({
-  name: 'AppNavbar',
-})
-
 const isMobileMenuOpen = ref<boolean>(false)
+// 👇 1. NUEVA VARIABLE para controlar el menú desplegable de Portafolio
+const isPortfolioMenuOpen = ref<boolean>(false)
 </script>
 
 <template>
@@ -14,7 +18,7 @@ const isMobileMenuOpen = ref<boolean>(false)
     <div class="container mx-auto px-6">
       <div class="flex justify-between items-center py-3">
         <RouterLink to="/">
-          <img src="/images/logo.png" alt="Logo Laberintos Praderas" class="h-16 w-auto" />
+          <img src="/images/logo.png" alt="Logo Laberintos Praderas" class="h-10 w-auto" />
         </RouterLink>
 
         <div>
@@ -23,9 +27,42 @@ const isMobileMenuOpen = ref<boolean>(false)
               <RouterLink to="/servicios" class="text-gray-700 hover:text-primary font-medium"
                 >Servicios</RouterLink
               >
-              <RouterLink to="/portafolio" class="text-gray-700 hover:text-primary font-medium"
-                >Portafolio</RouterLink
+
+              <div
+                class="relative"
+                @mouseenter="isPortfolioMenuOpen = true"
+                @mouseleave="isPortfolioMenuOpen = false"
               >
+                <button
+                  class="flex items-center gap-x-1 text-gray-700 hover:text-primary font-medium"
+                >
+                  <span>Portafolio</span>
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                <div
+                  v-if="isPortfolioMenuOpen"
+                  class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white rounded-md shadow-xl py-2 z-10"
+                >
+                  <RouterLink
+                    to="/proyectos"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >Proyectos</RouterLink
+                  >
+                  <RouterLink
+                    to="/clientes"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >Clientes</RouterLink
+                  >
+                </div>
+              </div>
               <RouterLink to="/sobre-nosotros" class="text-gray-700 hover:text-primary font-medium"
                 >Sobre nosotros</RouterLink
               >
@@ -47,13 +84,7 @@ const isMobileMenuOpen = ref<boolean>(false)
               @click="isMobileMenuOpen = !isMobileMenuOpen"
               class="text-gray-700 focus:outline-none"
             >
-              <svg
-                class="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -73,9 +104,14 @@ const isMobileMenuOpen = ref<boolean>(false)
           >Servicios</RouterLink
         >
         <RouterLink
-          to="/portafolio"
+          to="/proyectos"
           class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 rounded"
-          >Portafolio</RouterLink
+          >Proyectos</RouterLink
+        >
+        <RouterLink
+          to="/clientes"
+          class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 rounded"
+          >Clientes</RouterLink
         >
         <RouterLink
           to="/sobre-nosotros"
