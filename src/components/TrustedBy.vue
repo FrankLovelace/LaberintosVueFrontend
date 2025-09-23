@@ -5,7 +5,7 @@ interface Cliente {
   id: number
   nombre: string
   logoUrl: string
-  LinkExterno?: string // Verifica que el nombre sea exactamente este
+  LinkExterno?: string
 }
 
 const clientes = ref<Cliente[]>([])
