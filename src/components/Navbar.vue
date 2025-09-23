@@ -1,16 +1,11 @@
-<script lang="ts">
-export default {
-  name: 'TheNavbar',
-}
-</script>
-
+<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
+// 👇 1. Importa los componentes de Headless UI que vamos a usar
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 
 const isMobileMenuOpen = ref<boolean>(false)
-// 👇 1. NUEVA VARIABLE para controlar el menú desplegable de Portafolio
-const isPortfolioMenuOpen = ref<boolean>(false)
 </script>
 
 <template>
@@ -28,12 +23,8 @@ const isPortfolioMenuOpen = ref<boolean>(false)
                 >Servicios</RouterLink
               >
 
-              <div
-                class="relative"
-                @mouseenter="isPortfolioMenuOpen = true"
-                @mouseleave="isPortfolioMenuOpen = false"
-              >
-                <button
+              <Menu as="div" class="relative">
+                <MenuButton
                   class="flex items-center gap-x-1 text-gray-700 hover:text-primary font-medium"
                 >
                   <span>Portafolio</span>
@@ -45,24 +36,46 @@ const isPortfolioMenuOpen = ref<boolean>(false)
                       d="M19 9l-7 7-7-7"
                     />
                   </svg>
-                </button>
+                </MenuButton>
 
-                <div
-                  v-if="isPortfolioMenuOpen"
-                  class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white rounded-md shadow-xl py-2 z-10"
+                <transition
+                  enter-active-class="transition duration-100 ease-out"
+                  enter-from-class="transform scale-95 opacity-0"
+                  enter-to-class="transform scale-100 opacity-100"
+                  leave-active-class="transition duration-75 ease-in"
+                  leave-from-class="transform scale-100 opacity-100"
+                  leave-to-class="transform scale-95 opacity-0"
                 >
-                  <RouterLink
-                    to="/proyectos"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >Proyectos</RouterLink
+                  <MenuItems
+                    class="absolute left-1/2 -translate-x-1/2 mt-2 w-48 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
                   >
-                  <RouterLink
-                    to="/clientes"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >Clientes</RouterLink
-                  >
-                </div>
-              </div>
+                    <div class="py-1">
+                      <MenuItem v-slot="{ active }">
+                        <RouterLink
+                          to="/proyectos"
+                          :class="[
+                            active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                            'block px-4 py-2 text-sm',
+                          ]"
+                        >
+                          Proyectos
+                        </RouterLink>
+                      </MenuItem>
+                      <MenuItem v-slot="{ active }">
+                        <RouterLink
+                          to="/clientes"
+                          :class="[
+                            active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                            'block px-4 py-2 text-sm',
+                          ]"
+                        >
+                          Clientes
+                        </RouterLink>
+                      </MenuItem>
+                    </div>
+                  </MenuItems>
+                </transition>
+              </Menu>
               <RouterLink to="/sobre-nosotros" class="text-gray-700 hover:text-primary font-medium"
                 >Sobre nosotros</RouterLink
               >
@@ -97,39 +110,7 @@ const isPortfolioMenuOpen = ref<boolean>(false)
         </div>
       </div>
 
-      <div v-if="isMobileMenuOpen" class="md:hidden pb-3">
-        <RouterLink
-          to="/servicios"
-          class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 rounded"
-          >Servicios</RouterLink
-        >
-        <RouterLink
-          to="/proyectos"
-          class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 rounded"
-          >Proyectos</RouterLink
-        >
-        <RouterLink
-          to="/clientes"
-          class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 rounded"
-          >Clientes</RouterLink
-        >
-        <RouterLink
-          to="/sobre-nosotros"
-          class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 rounded"
-          >Sobre nosotros</RouterLink
-        >
-        <RouterLink
-          to="/contacto"
-          class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 rounded"
-          >Contacto</RouterLink
-        >
-        <a
-          href="https://app.laberintospraderas.com"
-          target="_blank"
-          class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 rounded"
-          >Admin Panel</a
-        >
-      </div>
+      <div v-if="isMobileMenuOpen" class="md:hidden pb-3"></div>
     </div>
   </nav>
 </template>
