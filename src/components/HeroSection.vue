@@ -20,7 +20,7 @@
       </p>
 
       <a
-        href="/portafolio"
+        href="/proyectos"
         class="mt-8 inline-block bg-accent text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-amber-500 transition-transform hover:scale-105"
       >
         Ver Nuestros Proyectos
