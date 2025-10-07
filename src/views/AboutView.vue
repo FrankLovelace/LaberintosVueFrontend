@@ -12,7 +12,7 @@ import FeatureSection from '../components/FeatureSection.vue'
         <div class="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           <div>
             <img
-              src="/images/founder.jpeg"
+              src="/images/founder.png"
               alt="Fundador de Laberintos Praderas"
               class="rounded-lg shadow-2xl w-full"
             />
