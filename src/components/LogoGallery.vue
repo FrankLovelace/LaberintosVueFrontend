@@ -83,7 +83,7 @@ onUnmounted(() => {
         <div
           v-for="logo in logos"
           :key="logo.id"
-          class="flex justify-center items-center h-40 p-6"
+          class="flex justify-center items-center h-40 p-8"
           :title="logo.nombre"
         >
           <img
