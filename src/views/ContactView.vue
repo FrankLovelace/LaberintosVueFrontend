@@ -1,21 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import Navbar from '@/components/Navbar.vue'
 import ContactInfoCard from '@/components/ContactInfoCard.vue'
-
-// Estado para el formulario de contacto
-const form = ref({
-  name: '',
-  email: '',
-  message: '',
-})
-
-const handleSubmit = () => {
-  // Por ahora, solo mostraremos los datos en la consola.
-  // Para enviar un email real, se necesita un servicio de backend o de terceros.
-  alert('Formulario enviado (revisar consola para ver los datos)')
-  console.log('Datos del formulario:', form.value)
-}
+// No se requiere lógica adicional para esta vista de contacto
 </script>
 
 <template>
@@ -77,59 +63,6 @@ const handleSubmit = () => {
             </svg>
           </ContactInfoCard>
         </div>
-
-        <div class="bg-white p-8 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-bold text-gray-800 mb-6">Envíanos un Mensaje</h2>
-          <form @submit.prevent="handleSubmit">
-            <div class="mb-4">
-              <label for="name" class="block text-gray-700 font-bold mb-2">Nombre</label>
-              <input
-                type="text"
-                id="name"
-                v-model="form.name"
-                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                required
-              />
-            </div>
-            <div class="mb-4">
-              <label for="email" class="block text-gray-700 font-bold mb-2"
-                >Correo Electrónico</label
-              >
-              <input
-                type="email"
-                id="email"
-                v-model="form.email"
-                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                required
-              />
-            </div>
-            <div class="mb-6">
-              <label for="message" class="block text-gray-700 font-bold mb-2">Mensaje</label>
-              <textarea
-                id="message"
-                v-model="form.message"
-                rows="5"
-                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                required
-              ></textarea>
-            </div>
-            <button
-              type="submit"
-              class="w-full bg-accent text-white font-bold py-3 px-4 rounded-lg hover:bg-amber-500 transition-colors"
-            >
-              Enviar Mensaje
-            </button>
-          </form>
-        </div>
-      </div>
-
-      <div class="text-center py-8">
-        <p class="text-sm text-gray-500">
-          Para contactar al desarrollador:
-          <a href="mailto:francisco.a.gallegosv@gmail.com" class="text-primary hover:underline"
-            >francisco.a.gallegosv@gmail.com</a
-          >
-        </p>
       </div>
     </main>
   </div>
