@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import Navbar from '@/components/Navbar.vue'
 
 // --- ESTADO ---
 // Iniciamos en 'galeria' para ver el resultado de tu trabajo inmediatamente
