@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import Navbar from '@/components/Navbar.vue'
+import ProjectModal from '@/components/ProjectModal.vue' // <-- 1. IMPORTAR
 
 // --- INTERFACES ---
 interface ProyectoDto {
@@ -19,13 +20,15 @@ interface ProyectoFrontend extends ProyectoDto {
 }
 
 // --- ESTADO ---
-const activeTab = ref<'destacados' | 'galeria'>('destacados')
-
-// Estado Proyectos
+const activeTab = ref<'destacados' | 'galeria'>('destacados') // Volvemos a destacados por defecto
 const proyectos = ref<ProyectoFrontend[]>([])
 const loadingProyectos = ref(false)
 
-// Estado Galería
+// Estado para el Modal
+const isModalOpen = ref(false)
+const selectedProject = ref<ProyectoFrontend | null>(null) // <-- Proyecto seleccionado
+
+// Estado Galería (Igual que antes)
 const galleryImages = ref<string[]>([])
 const galleryPage = ref(1)
 const galleryLoading = ref(false)
@@ -33,37 +36,46 @@ const galleryHasMore = ref(true)
 const sentinel = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
 
-// --- FUNCIONES DE AYUDA ---
-// Función para recortar el texto a N caracteres
 const truncateText = (text: string, length: number) => {
   if (!text) return ''
   if (text.length <= length) return text
   return text.slice(0, length) + '...'
 }
 
-// --- FUNCIONES DE CARGA ---
+// --- LÓGICA DEL MODAL ---
+const abrirModalProyecto = (proyecto: ProyectoFrontend) => {
+  selectedProject.value = proyecto
+  isModalOpen.value = true
+  // Deshabilitar scroll del body cuando el modal está abierto
+  document.body.style.overflow = 'hidden'
+}
+
+const cerrarModal = () => {
+  isModalOpen.value = false
+  setTimeout(() => {
+    selectedProject.value = null
+  }, 300) // Limpiar después de la animación
+  document.body.style.overflow = 'auto'
+}
+
+// --- CARGA DE DATOS (Igual que antes) ---
 const fetchProyectos = async () => {
   loadingProyectos.value = true
   try {
     const response = await fetch('https://app.laberintospraderas.com/api/portfolio/proyectos')
     if (response.ok) {
       const data: ProyectoDto[] = await response.json()
-
       proyectos.value = data.map((p) => {
         const imgs: string[] = []
         if (p.imagenUrl) imgs.push(p.imagenUrl)
         if (p.imagenUrl2) imgs.push(p.imagenUrl2)
         if (p.imagenUrl3) imgs.push(p.imagenUrl3)
         if (p.imagenUrl4) imgs.push(p.imagenUrl4)
-
-        return {
-          ...p,
-          todasLasImagenes: imgs,
-        }
+        return { ...p, todasLasImagenes: imgs }
       })
     }
   } catch (error) {
-    console.error('Error cargando proyectos:', error)
+    console.error(error)
   } finally {
     loadingProyectos.value = false
   }
@@ -89,15 +101,6 @@ const fetchGallery = async () => {
   } finally {
     galleryLoading.value = false
   }
-}
-
-// --- NAVEGACIÓN ---
-const irADetalle = (proyecto: ProyectoFrontend) => {
-  console.log('Navegar a detalle de:', proyecto.nombreProyecto)
-}
-
-const abrirLightbox = (imgUrl: string) => {
-  console.log('Abrir imagen en grande:', imgUrl)
 }
 
 // --- CICLO DE VIDA ---
@@ -145,7 +148,6 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
           </p>
         </div>
 
-        <!-- PESTAÑAS -->
         <div class="flex justify-center mb-10 border-b border-gray-200">
           <button
             @click="switchTab('destacados')"
@@ -180,20 +182,71 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
           </div>
 
           <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- TARJETA DE PROYECTO -->
+            <!-- TARJETA (Click abre Modal) -->
             <article
               v-for="(proyecto, index) in proyectos"
               :key="index"
               class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col h-full border border-gray-100"
             >
-              <!-- ÁREA DE IMÁGENES (Mosaico Dinámico) -->
-              <div class="w-full aspect-[4/3] bg-gray-100 p-1">
+              <div
+                class="w-full aspect-[4/3] bg-gray-100 p-1 cursor-pointer"
+                @click="abrirModalProyecto(proyecto)"
+              >
                 <div class="flex h-full w-full gap-1">
-                  <!-- 1. IMAGEN PRINCIPAL -->
+                  <!-- 1. IMAGEN PRINCIPAL (Izquierda) -->
+                  <!-- Lógica dinámica: Ocupa el 75% (w-3/4) si hay más fotos, o el 100% (w-full) si está sola -->
                   <div
-                    @click="irADetalle(proyecto)"
                     :class="[
-                      'h-full relative overflow-hidden rounded-lg cursor-pointer group',
+                      'h-full relative overflow-hidden rounded-lg group',
+                      proyecto.todasLasImagenes.length > 1 ? 'w-3/4' : 'w-full',
+                    ]"
+                  >
+                    <img
+                      :src="proyecto.imagenUrl"
+                      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <!-- Overlay sutil al pasar el mouse -->
+                    <div
+                      class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity"
+                    ></div>
+                  </div>
+
+                  <!-- 2. COLUMNA DERECHA (Miniaturas) -->
+                  <!-- Solo se renderiza si el proyecto tiene más de 1 imagen -->
+                  <div
+                    v-if="proyecto.todasLasImagenes.length > 1"
+                    class="w-1/4 flex flex-col gap-1 h-full"
+                  >
+                    <!-- Iteramos sobre las imágenes extra (quitando la primera con .slice(1)) -->
+                    <div
+                      v-for="(imgExtra, i) in proyecto.todasLasImagenes.slice(1)"
+                      :key="i"
+                      class="relative flex-1 overflow-hidden rounded-lg group"
+                    >
+                      <!-- flex-1 hace que cada imagen ocupe una fracción igual de la altura disponible -->
+                      <img
+                        :src="imgExtra"
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                      />
+                      <div
+                        class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- IMPORTANTE: Agregar @click="abrirModalProyecto(proyecto)" al contenedor principal de imágenes -->
+              <div
+                class="w-full aspect-[4/3] bg-gray-100 p-1 cursor-pointer"
+                @click="abrirModalProyecto(proyecto)"
+              >
+                <div class="flex h-full w-full gap-1">
+                  <!-- Imagen Principal -->
+                  <div
+                    :class="[
+                      'h-full relative overflow-hidden rounded-lg group',
                       proyecto.todasLasImagenes.length > 1 ? 'w-3/4' : 'w-full',
                     ]"
                   >
@@ -206,7 +259,7 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
                     ></div>
                   </div>
 
-                  <!-- 2. COLUMNA DERECHA (Miniaturas) -->
+                  <!-- Miniaturas -->
                   <div
                     v-if="proyecto.todasLasImagenes.length > 1"
                     class="w-1/4 flex flex-col gap-1 h-full"
@@ -214,8 +267,7 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
                     <div
                       v-for="(imgExtra, i) in proyecto.todasLasImagenes.slice(1)"
                       :key="i"
-                      @click.stop="abrirLightbox(imgExtra)"
-                      class="relative flex-1 overflow-hidden rounded-lg cursor-zoom-in group"
+                      class="relative flex-1 overflow-hidden rounded-lg group"
                     >
                       <img
                         :src="imgExtra"
@@ -229,32 +281,28 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
                 </div>
               </div>
 
-              <!-- ÁREA DE TEXTO -->
-              <div class="p-6 flex flex-col flex-grow cursor-pointer" @click="irADetalle(proyecto)">
+              <!-- Texto -->
+              <div
+                class="p-6 flex flex-col flex-grow cursor-pointer"
+                @click="abrirModalProyecto(proyecto)"
+              >
                 <div class="flex items-center justify-between mb-3">
-                  <h3
-                    class="text-xl font-bold text-gray-900 line-clamp-1"
-                    :title="proyecto.nombreProyecto"
-                  >
+                  <h3 class="text-xl font-bold text-gray-900 line-clamp-1">
                     {{ proyecto.nombreProyecto }}
                   </h3>
                   <img
                     v-if="proyecto.clienteLogoUrl"
                     :src="proyecto.clienteLogoUrl"
                     class="h-8 w-auto object-contain opacity-80"
-                    :title="proyecto.nombreCliente"
                   />
                 </div>
-
-                <!-- DESCRIPCIÓN TRUNCADA A 150 CARACTERES -->
-                <p class="text-gray-600 text-sm mb-4 flex-grow">
+                <p class="text-gray-600 text-sm mb-4 line-clamp-3">
                   {{ truncateText(proyecto.descripcion, 150) }}
                 </p>
-
                 <div
                   class="pt-4 border-t border-gray-50 flex items-center text-blue-600 text-sm font-semibold group"
                 >
-                  Ver Detalles
+                  Ver Detalles Completos
                   <svg
                     class="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1"
                     fill="none"
@@ -280,8 +328,7 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
             <div
               v-for="(imgUrl, index) in galleryImages"
               :key="index"
-              class="group relative aspect-square bg-gray-200 rounded-lg overflow-hidden cursor-zoom-in"
-              @click="abrirLightbox(imgUrl)"
+              class="group relative aspect-square bg-gray-200 rounded-lg overflow-hidden"
             >
               <img
                 :src="imgUrl"
@@ -300,6 +347,8 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
         </section>
       </div>
     </main>
+
+    <ProjectModal :isOpen="isModalOpen" :project="selectedProject" @close="cerrarModal" />
   </div>
 </template>
 
@@ -316,11 +365,5 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
     opacity: 1;
     transform: translateY(0);
   }
-}
-.delay-100 {
-  animation-delay: 0.1s;
-}
-.delay-200 {
-  animation-delay: 0.2s;
 }
 </style>
