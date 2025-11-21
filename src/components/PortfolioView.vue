@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import ProjectModal from '@/components/ProjectModal.vue'
+import ImageLightbox from '@/components/ImageLightbox.vue'
 
 // --- INTERFACES ---
 interface ProyectoDto {
@@ -35,6 +36,21 @@ const galleryLoading = ref(false)
 const galleryHasMore = ref(true)
 const sentinel = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
+
+// Estado Lightbox
+const isLightboxOpen = ref(false)
+const selectedGalleryImage = ref('')
+
+const abrirLightbox = (url: string) => {
+  selectedGalleryImage.value = url
+  isLightboxOpen.value = true
+  document.body.style.overflow = 'hidden'
+}
+
+const cerrarLightbox = () => {
+  isLightboxOpen.value = false
+  document.body.style.overflow = 'auto'
+}
 
 const truncateText = (text: string, length: number) => {
   if (!text) return ''
@@ -273,8 +289,8 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
                       stroke-linecap="round"
                       stroke-linejoin="round"
                       stroke-width="2"
-                      d="M9 5l7 7-7 7"
-                    ></path>
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                    />
                   </svg>
                 </div>
               </div>
@@ -289,6 +305,7 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
               v-for="(imgUrl, index) in galleryImages"
               :key="index"
               class="group relative aspect-square bg-gray-200 rounded-lg overflow-hidden cursor-zoom-in"
+              @click="abrirLightbox(imgUrl)"
             >
               <img
                 :src="imgUrl"
@@ -314,6 +331,11 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
       :project="selectedProject"
       :initialImage="selectedInitialImage"
       @close="cerrarModal"
+    />
+    <ImageLightbox
+      :isOpen="isLightboxOpen"
+      :imageUrl="selectedGalleryImage"
+      @close="cerrarLightbox"
     />
   </div>
 </template>
