@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import Navbar from '@/components/Navbar.vue'
-import ProjectModal from '@/components/ProjectModal.vue' // <-- 1. IMPORTAR
+import ProjectModal from '@/components/ProjectModal.vue'
 
 // --- INTERFACES ---
 interface ProyectoDto {
@@ -20,15 +20,15 @@ interface ProyectoFrontend extends ProyectoDto {
 }
 
 // --- ESTADO ---
-const activeTab = ref<'destacados' | 'galeria'>('destacados') // Volvemos a destacados por defecto
+const activeTab = ref<'destacados' | 'galeria'>('destacados')
 const proyectos = ref<ProyectoFrontend[]>([])
 const loadingProyectos = ref(false)
 
 // Estado para el Modal
 const isModalOpen = ref(false)
-const selectedProject = ref<ProyectoFrontend | null>(null) // <-- Proyecto seleccionado
+const selectedProject = ref<ProyectoFrontend | null>(null)
 
-// Estado Galería (Igual que antes)
+// Estado Galería
 const galleryImages = ref<string[]>([])
 const galleryPage = ref(1)
 const galleryLoading = ref(false)
@@ -46,7 +46,6 @@ const truncateText = (text: string, length: number) => {
 const abrirModalProyecto = (proyecto: ProyectoFrontend) => {
   selectedProject.value = proyecto
   isModalOpen.value = true
-  // Deshabilitar scroll del body cuando el modal está abierto
   document.body.style.overflow = 'hidden'
 }
 
@@ -54,11 +53,11 @@ const cerrarModal = () => {
   isModalOpen.value = false
   setTimeout(() => {
     selectedProject.value = null
-  }, 300) // Limpiar después de la animación
+  }, 300)
   document.body.style.overflow = 'auto'
 }
 
-// --- CARGA DE DATOS (Igual que antes) ---
+// --- CARGA DE DATOS ---
 const fetchProyectos = async () => {
   loadingProyectos.value = true
   try {
@@ -148,6 +147,7 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
           </p>
         </div>
 
+        <!-- Pestañas -->
         <div class="flex justify-center mb-10 border-b border-gray-200">
           <button
             @click="switchTab('destacados')"
@@ -182,88 +182,47 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
           </div>
 
           <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- TARJETA (Click abre Modal) -->
+            <!-- TARJETA DE PROYECTO -->
             <article
               v-for="(proyecto, index) in proyectos"
               :key="index"
               class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col h-full border border-gray-100"
             >
+              <!-- ÁREA DE IMÁGENES (Mosaico Dinámico) -->
               <div
                 class="w-full aspect-[4/3] bg-gray-100 p-1 cursor-pointer"
                 @click="abrirModalProyecto(proyecto)"
               >
                 <div class="flex h-full w-full gap-1">
                   <!-- 1. IMAGEN PRINCIPAL (Izquierda) -->
-                  <!-- Lógica dinámica: Ocupa el 75% (w-3/4) si hay más fotos, o el 100% (w-full) si está sola -->
+                  <!-- Se ajusta el ancho dinámicamente según si hay más imágenes o no -->
                   <div
                     :class="[
                       'h-full relative overflow-hidden rounded-lg group',
-                      proyecto.todasLasImagenes.length > 1 ? 'w-3/4' : 'w-full',
+                      proyecto.todasLasImagenes.length > 2
+                        ? 'w-3/4'
+                        : proyecto.todasLasImagenes.length === 2
+                          ? 'w-2/3'
+                          : 'w-full',
                     ]"
                   >
                     <img
                       :src="proyecto.imagenUrl"
                       class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      loading="lazy"
                     />
-                    <!-- Overlay sutil al pasar el mouse -->
                     <div
                       class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity"
                     ></div>
                   </div>
 
                   <!-- 2. COLUMNA DERECHA (Miniaturas) -->
-                  <!-- Solo se renderiza si el proyecto tiene más de 1 imagen -->
                   <div
                     v-if="proyecto.todasLasImagenes.length > 1"
-                    class="w-1/4 flex flex-col gap-1 h-full"
-                  >
-                    <!-- Iteramos sobre las imágenes extra (quitando la primera con .slice(1)) -->
-                    <div
-                      v-for="(imgExtra, i) in proyecto.todasLasImagenes.slice(1)"
-                      :key="i"
-                      class="relative flex-1 overflow-hidden rounded-lg group"
-                    >
-                      <!-- flex-1 hace que cada imagen ocupe una fracción igual de la altura disponible -->
-                      <img
-                        :src="imgExtra"
-                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        loading="lazy"
-                      />
-                      <div
-                        class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- IMPORTANTE: Agregar @click="abrirModalProyecto(proyecto)" al contenedor principal de imágenes -->
-              <div
-                class="w-full aspect-[4/3] bg-gray-100 p-1 cursor-pointer"
-                @click="abrirModalProyecto(proyecto)"
-              >
-                <div class="flex h-full w-full gap-1">
-                  <!-- Imagen Principal -->
-                  <div
                     :class="[
-                      'h-full relative overflow-hidden rounded-lg group',
-                      proyecto.todasLasImagenes.length > 1 ? 'w-3/4' : 'w-full',
+                      'flex flex-col gap-1 h-full',
+                      proyecto.todasLasImagenes.length === 2 ? 'w-1/3' : 'w-1/4',
                     ]"
                   >
-                    <img
-                      :src="proyecto.imagenUrl"
-                      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div
-                      class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity"
-                    ></div>
-                  </div>
-
-                  <!-- Miniaturas -->
-                  <div
-                    v-if="proyecto.todasLasImagenes.length > 1"
-                    class="w-1/4 flex flex-col gap-1 h-full"
-                  >
                     <div
                       v-for="(imgExtra, i) in proyecto.todasLasImagenes.slice(1)"
                       :key="i"
@@ -281,7 +240,7 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
                 </div>
               </div>
 
-              <!-- Texto -->
+              <!-- ÁREA DE TEXTO -->
               <div
                 class="p-6 flex flex-col flex-grow cursor-pointer"
                 @click="abrirModalProyecto(proyecto)"
@@ -328,7 +287,7 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
             <div
               v-for="(imgUrl, index) in galleryImages"
               :key="index"
-              class="group relative aspect-square bg-gray-200 rounded-lg overflow-hidden"
+              class="group relative aspect-square bg-gray-200 rounded-lg overflow-hidden cursor-zoom-in"
             >
               <img
                 :src="imgUrl"
@@ -338,6 +297,7 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
             </div>
           </div>
           <div ref="sentinel" class="h-24 py-8 flex justify-center items-center w-full">
+            <!-- Spinner -->
             <div v-if="galleryLoading" class="flex items-center space-x-2 text-gray-500">
               <div class="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
               <div class="w-3 h-3 bg-blue-500 rounded-full animate-bounce delay-100"></div>
