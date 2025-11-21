@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import Navbar from '@/components/Navbar.vue'
 import ProjectModal from '@/components/ProjectModal.vue'
 
 // --- INTERFACES ---
