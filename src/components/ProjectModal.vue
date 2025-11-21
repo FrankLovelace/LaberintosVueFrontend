@@ -20,15 +20,51 @@ const emit = defineEmits(['close'])
 // Estado de la imagen seleccionada actualmente en el visor
 const currentImage = ref('')
 
-// Cuando cambia el proyecto o se abre el modal, ponemos la primera imagen
+// --- ESTADO Y LÓGICA PARA EL ZOOM ---
+const zoomStyle = ref({}) // Estilos dinámicos para aplicar el zoom
+
+const handleMouseMove = (e: MouseEvent) => {
+  const img = e.target as HTMLImageElement
+
+  // Obtenemos las dimensiones y posición de la imagen en la pantalla
+  const { left, top, width, height } = img.getBoundingClientRect()
+
+  // Calculamos la posición del mouse como porcentaje relativo a la imagen
+  const x = ((e.clientX - left) / width) * 100
+  const y = ((e.clientY - top) / height) * 100
+
+  // Aplicamos el zoom hacia esa posición exacta
+  zoomStyle.value = {
+    transformOrigin: `${x}% ${y}%`,
+    transform: 'scale(2)', // Nivel de zoom (2x)
+    cursor: 'zoom-out',
+  }
+}
+
+const resetZoom = () => {
+  // Regresamos la imagen a su estado normal
+  zoomStyle.value = {
+    transformOrigin: 'center center',
+    transform: 'scale(1)',
+    cursor: 'zoom-in',
+  }
+}
+
+// Cuando cambia el proyecto o se abre el modal, ponemos la primera imagen y reseteamos zoom
 watch(
   () => props.project,
   (newProject) => {
     if (newProject && newProject.todasLasImagenes.length > 0) {
       currentImage.value = newProject.todasLasImagenes[0]
+      resetZoom()
     }
   },
 )
+
+// Resetear zoom también al cambiar de imagen interna
+watch(currentImage, () => {
+  resetZoom()
+})
 
 const close = () => {
   emit('close')
@@ -75,20 +111,19 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
           </svg>
         </button>
 
-        <!-- ÁREA DE IMÁGENES (IZQUIERDA + CENTRO) - Ocupa 70% aprox -->
+        <!-- ÁREA DE IMÁGENES (IZQUIERDA + CENTRO) -->
         <div class="flex-grow flex bg-gray-100 overflow-hidden">
           <!-- 1. TIRA DE MINIATURAS (IZQUIERDA) -->
-          <!-- Solo se muestra si hay más de 1 imagen -->
           <div
             v-if="project.todasLasImagenes.length > 1"
-            class="w-24 flex-shrink-0 flex flex-col gap-3 p-3 overflow-y-auto bg-white border-r border-gray-200 scrollbar-hide"
+            class="w-24 flex-shrink-0 flex flex-col gap-3 p-3 overflow-y-auto bg-white border-r border-gray-200 scrollbar-hide z-20"
           >
             <button
               v-for="(img, index) in project.todasLasImagenes"
               :key="index"
               @click="currentImage = img"
               :class="[
-                'relative aspect-square rounded-lg overflow-hidden transition-all duration-300',
+                'relative aspect-square rounded-lg overflow-hidden transition-all duration-300 flex-shrink-0',
                 currentImage === img
                   ? 'ring-2 ring-blue-600 ring-offset-1 opacity-100'
                   : 'opacity-60 hover:opacity-100',
@@ -98,18 +133,24 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
             </button>
           </div>
 
-          <!-- 2. VISOR PRINCIPAL (CENTRO) -->
-          <div class="flex-grow flex items-center justify-center p-4 bg-gray-50 relative group">
+          <!-- 2. VISOR PRINCIPAL (CENTRO) - CON ZOOM -->
+          <!-- Agregamos overflow-hidden aquí para que el zoom no se salga del cuadro -->
+          <div
+            class="flex-grow flex items-center justify-center p-4 bg-gray-50 relative overflow-hidden"
+          >
             <img
               :src="currentImage"
-              class="max-w-full max-h-full object-contain shadow-lg rounded-md transition-transform duration-500"
+              class="max-w-full max-h-full object-contain shadow-lg rounded-md transition-transform duration-200 ease-out"
+              :style="zoomStyle"
+              @mousemove="handleMouseMove"
+              @mouseleave="resetZoom"
             />
           </div>
         </div>
 
-        <!-- 3. INFORMACIÓN (DERECHA) - Ocupa 30% aprox -->
+        <!-- 3. INFORMACIÓN (DERECHA) -->
         <div
-          class="w-96 flex-shrink-0 bg-white p-8 flex flex-col overflow-y-auto border-l border-gray-100"
+          class="w-96 flex-shrink-0 bg-white p-8 flex flex-col overflow-y-auto border-l border-gray-100 z-20"
         >
           <!-- Encabezado Proyecto -->
           <div class="mb-6">
