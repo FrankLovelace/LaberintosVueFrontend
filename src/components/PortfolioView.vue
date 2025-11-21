@@ -26,6 +26,7 @@ const loadingProyectos = ref(false)
 // Estado para el Modal
 const isModalOpen = ref(false)
 const selectedProject = ref<ProyectoFrontend | null>(null)
+const selectedInitialImage = ref<string | undefined>(undefined) // <-- NUEVO: Guarda la imagen clickeada
 
 // Estado Galería
 const galleryImages = ref<string[]>([])
@@ -42,8 +43,9 @@ const truncateText = (text: string, length: number) => {
 }
 
 // --- LÓGICA DEL MODAL ---
-const abrirModalProyecto = (proyecto: ProyectoFrontend) => {
+const abrirModalProyecto = (proyecto: ProyectoFrontend, imagenInicial?: string) => {
   selectedProject.value = proyecto
+  selectedInitialImage.value = imagenInicial // Guardamos cuál imagen se clickeó
   isModalOpen.value = true
   document.body.style.overflow = 'hidden'
 }
@@ -307,7 +309,12 @@ const switchTab = (tab: 'destacados' | 'galeria') => {
       </div>
     </main>
 
-    <ProjectModal :isOpen="isModalOpen" :project="selectedProject" @close="cerrarModal" />
+    <ProjectModal
+      :isOpen="isModalOpen"
+      :project="selectedProject"
+      :initialImage="selectedInitialImage"
+      @close="cerrarModal"
+    />
   </div>
 </template>
 

@@ -13,6 +13,7 @@ interface Proyecto {
 const props = defineProps<{
   isOpen: boolean
   project: Proyecto | null
+  initialImage?: string // <-- NUEVA PROP: La imagen que queremos ver primero
 }>()
 
 const emit = defineEmits(['close'])
@@ -21,28 +22,22 @@ const emit = defineEmits(['close'])
 const currentImage = ref('')
 
 // --- ESTADO Y LÓGICA PARA EL ZOOM ---
-const zoomStyle = ref({}) // Estilos dinámicos para aplicar el zoom
+const zoomStyle = ref({})
 
 const handleMouseMove = (e: MouseEvent) => {
   const img = e.target as HTMLImageElement
-
-  // Obtenemos las dimensiones y posición de la imagen en la pantalla
   const { left, top, width, height } = img.getBoundingClientRect()
-
-  // Calculamos la posición del mouse como porcentaje relativo a la imagen
   const x = ((e.clientX - left) / width) * 100
   const y = ((e.clientY - top) / height) * 100
 
-  // Aplicamos el zoom hacia esa posición exacta
   zoomStyle.value = {
     transformOrigin: `${x}% ${y}%`,
-    transform: 'scale(2)', // Nivel de zoom (2x)
+    transform: 'scale(2)',
     cursor: 'zoom-out',
   }
 }
 
 const resetZoom = () => {
-  // Regresamos la imagen a su estado normal
   zoomStyle.value = {
     transformOrigin: 'center center',
     transform: 'scale(1)',
@@ -50,18 +45,38 @@ const resetZoom = () => {
   }
 }
 
-// Cuando cambia el proyecto o se abre el modal, ponemos la primera imagen y reseteamos zoom
-watch(
-  () => props.project,
-  (newProject) => {
-    if (newProject && newProject.todasLasImagenes.length > 0) {
-      currentImage.value = newProject.todasLasImagenes[0]
-      resetZoom()
+// --- LÓGICA DE APERTURA INTELIGENTE ---
+// Esta función decide qué imagen mostrar al abrir
+const initializeModal = () => {
+  if (props.project) {
+    // 1. Si nos pasaron una imagen inicial Y esa imagen existe en el proyecto, la usamos.
+    if (props.initialImage && props.project.todasLasImagenes.includes(props.initialImage)) {
+      currentImage.value = props.initialImage
     }
+    // 2. Si no, usamos la primera por defecto (la portada).
+    else if (props.project.todasLasImagenes.length > 0) {
+      currentImage.value = props.project.todasLasImagenes[0]
+    }
+    resetZoom()
+  }
+}
+
+// Observamos 'isOpen'. Cuando se abre (true), inicializamos.
+watch(
+  () => props.isOpen,
+  (isOpen) => {
+    if (isOpen) initializeModal()
   },
 )
 
-// Resetear zoom también al cambiar de imagen interna
+// También observamos si cambia el proyecto mientras está abierto (raro, pero posible)
+watch(
+  () => props.project,
+  () => {
+    if (props.isOpen) initializeModal()
+  },
+)
+
 watch(currentImage, () => {
   resetZoom()
 })
@@ -70,7 +85,6 @@ const close = () => {
   emit('close')
 }
 
-// Cerrar con la tecla ESC
 const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Escape' && props.isOpen) close()
 }
@@ -80,23 +94,19 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
 </script>
 
 <template>
-  <!-- TRANSICIÓN DE ENTRADA/SALIDA -->
   <Transition name="modal">
     <div
       v-if="isOpen && project"
       class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
     >
-      <!-- BACKDROP (FONDO OSCURO Y BORROSO) -->
       <div
         class="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
         @click="close"
       ></div>
 
-      <!-- CONTENIDO DEL MODAL -->
       <div
         class="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[85vh] flex overflow-hidden animate-scale-up"
       >
-        <!-- BOTÓN DE CERRAR -->
         <button
           @click="close"
           class="absolute top-4 right-4 z-10 p-2 bg-white/80 hover:bg-white rounded-full text-gray-800 transition-colors shadow-sm"
@@ -111,9 +121,9 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
           </svg>
         </button>
 
-        <!-- ÁREA DE IMÁGENES (IZQUIERDA + CENTRO) -->
+        <!-- ÁREA DE IMÁGENES -->
         <div class="flex-grow flex bg-gray-100 overflow-hidden">
-          <!-- 1. TIRA DE MINIATURAS (IZQUIERDA) -->
+          <!-- Tira de miniaturas -->
           <div
             v-if="project.todasLasImagenes.length > 1"
             class="w-24 flex-shrink-0 flex flex-col gap-3 p-3 overflow-y-auto bg-white border-r border-gray-200 scrollbar-hide z-20"
@@ -133,8 +143,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
             </button>
           </div>
 
-          <!-- 2. VISOR PRINCIPAL (CENTRO) - CON ZOOM -->
-          <!-- Agregamos overflow-hidden aquí para que el zoom no se salga del cuadro -->
+          <!-- Visor Principal -->
           <div
             class="flex-grow flex items-center justify-center p-4 bg-gray-50 relative overflow-hidden"
           >
@@ -148,11 +157,10 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
           </div>
         </div>
 
-        <!-- 3. INFORMACIÓN (DERECHA) -->
+        <!-- INFORMACIÓN -->
         <div
           class="w-96 flex-shrink-0 bg-white p-8 flex flex-col overflow-y-auto border-l border-gray-100 z-20"
         >
-          <!-- Encabezado Proyecto -->
           <div class="mb-6">
             <div class="flex items-center gap-3 mb-4" v-if="project.clienteLogoUrl">
               <img :src="project.clienteLogoUrl" class="h-10 w-auto object-contain" />
@@ -165,12 +173,10 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
             </h2>
           </div>
 
-          <!-- Descripción -->
           <div class="prose prose-blue text-gray-600 leading-relaxed mb-8">
             <p>{{ project.descripcion }}</p>
           </div>
 
-          <!-- Footer / Call to Action -->
           <div class="mt-auto pt-6 border-t border-gray-100">
             <button
               class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
@@ -193,21 +199,17 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
 </template>
 
 <style scoped>
-/* Animaciones para el modal */
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity 0.3s ease;
 }
-
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
 }
-
 .animate-scale-up {
   animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
 @keyframes scaleUp {
   from {
     transform: scale(0.95);
@@ -218,8 +220,6 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
     opacity: 1;
   }
 }
-
-/* Ocultar scrollbar pero mantener funcionalidad */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
