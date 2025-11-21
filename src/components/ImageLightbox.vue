@@ -10,20 +10,6 @@ const emit = defineEmits(['close'])
 
 const zoomStyle = ref({})
 
-const handleMouseMove = (e: MouseEvent) => {
-  const img = e.target as HTMLImageElement
-  // Obtenemos dimensiones para calcular dónde está el mouse relativo a la imagen
-  const { left, top, width, height } = img.getBoundingClientRect()
-  const x = ((e.clientX - left) / width) * 100
-  const y = ((e.clientY - top) / height) * 100
-
-  zoomStyle.value = {
-    transformOrigin: `${x}% ${y}%`,
-    transform: 'scale(2.5)', // Un poco más de zoom para detalles (2.5x)
-    cursor: 'zoom-out',
-  }
-}
-
 const resetZoom = () => {
   zoomStyle.value = {
     transformOrigin: 'center center',
@@ -80,8 +66,6 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
           :src="imageUrl"
           class="max-w-full max-h-full object-contain shadow-2xl transition-transform duration-200 ease-out select-none"
           :style="zoomStyle"
-          @mousemove="handleMouseMove"
-          @mouseleave="resetZoom"
           @click.stop=""
         />
       </div>
